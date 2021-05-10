@@ -10,6 +10,7 @@
 
 using std::vector;
 using std::cout;
+using std::endl;
 using std::tuple;
 
 // pass 2 array by reference and randomly generate symmetric adjacency matrix for Kn graph
@@ -49,10 +50,11 @@ vector<tuple<int, float>> nearestNeighbor(float** &mat, int first, int v, vector
 
 int main(){
 
-    cout <<
-        "\n-----------------------------------------------------\n"
-        "| Branching Nearest Neighbor for Traveling Salesman |\n"
-        "-----------------------------------------------------\n\n";
+    cout << endl
+        << "-----------------------------------------------------" << endl
+        << "| Branching Nearest Neighbor for Traveling Salesman |" << endl
+        << "-----------------------------------------------------" << endl
+        << endl;
 
     // aribitrary size graph
     float** adjMat;
@@ -66,7 +68,7 @@ int main(){
         for(int j = 0; j < size; j++){
             cout << adjMat[i][j] << ", ";
         }
-        cout << std::endl;
+        cout << endl;
     }
     cout << "\n\n";
 
@@ -78,6 +80,11 @@ int main(){
         remaining.erase(remaining.begin() + i); // remove start vertex
 
         vector<tuple<int, float>> result = nearestNeighbor(adjMat, i, i, remaining);
+
+        for(int j = 0; j < result.size(); j++){
+            cout << std::get<0>(result[j]) << " " << std::get<1>(result[j]) << endl;
+        }
+        cout << "--------------" << endl;
     }
 
     return 0;
