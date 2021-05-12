@@ -39,13 +39,53 @@ void generateMatrix(float** &mat, int size){
     }
 }
 
+
 vector<tuple<int, float>> nearestNeighbor(float** &mat, int first, int v, vector<int> remaining){
-
-    return {{1, 5.5f}};
-
+    //no other options left
     if(remaining.size() == 0){
         return {{first, mat[first][v]}};
     }
+
+    //find nearest neighbor(s)
+    vector<int> nearest = {}; //vector in case of ties
+    float min = __FLT_MAX__; //keep track of min value separately
+
+    for(int i = 0; i < remaining.size(); i++){
+        float weight = mat[remaining[i]][v];
+        // cout << "weight for " << remaining[i] << ": " << weight << endl;
+        if(weight < min){
+            nearest = {remaining[i]};
+            min = weight;
+        } else if (weight == min){
+            nearest.push_back(remaining[i]);
+        }
+    }
+
+    // cout << "lowest is " << min << endl;
+    for( auto i : nearest){
+        // cout << "nearest: " << i << endl;
+    }
+    // cout << "-------------" << endl;
+    //find lowest total weight of all ties. call function recursively
+    vector<tuple<int, float>> shortestFromTies = {{-1, __FLT_MAX__}};
+
+    for(int i = 0; i < nearest.size(); i++){
+        vector<int> newRemaining = remaining;
+        newRemaining.erase(std::remove(newRemaining.begin(), newRemaining.end(), nearest[i]), newRemaining.end());
+        // cout << "before recursive call" << endl;
+        vector<tuple<int, float>> result = nearestNeighbor(mat, first, nearest[i], newRemaining);
+        // cout << "after recursive call" << endl;
+        result.insert(result.begin(), {nearest[i], std::get<1>(result[0]) + min});
+
+        if(std::get<1>(result[0]) < std::get<1>(shortestFromTies[0])){
+            shortestFromTies = result;
+        }
+    }
+
+    return shortestFromTies;
+    // return {{1, 5.5f}};
+
+    //if tie still exists, choose path with lowest index vertex
 }
 
 int main(){
@@ -81,6 +121,10 @@ int main(){
 
         vector<tuple<int, float>> result = nearestNeighbor(adjMat, i, i, remaining);
 
+        // for(int j = 0; j < remaining.size(); j++){
+        //     cout << remaining[j] << endl;
+        // }
+        cout << endl << endl << "Results: " << endl;
         for(int j = 0; j < result.size(); j++){
             cout << std::get<0>(result[j]) << " " << std::get<1>(result[j]) << endl;
         }
