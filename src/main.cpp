@@ -6,7 +6,7 @@
 #include <iterator>
 #include <algorithm>
 #include <numeric>
-// #include <list>
+#include <stdlib.h>
 
 using std::vector;
 using std::cout;
@@ -39,8 +39,8 @@ void generateMatrix(float** &mat, int size){
     }
 }
 
-//returns
-vector<tuple<int, float>> nearestNeighbor(float** &mat, int first, int v, vector<int> remaining){
+//returns the shortest path found using the nearest neighbor algorithm with branching for ties
+vector<tuple<int, float>> nearestNeighborRecursive(float** &mat, int first, int v, vector<int> remaining){
 
     //no other options left
     if(remaining.size() == 0){
@@ -71,7 +71,7 @@ vector<tuple<int, float>> nearestNeighbor(float** &mat, int first, int v, vector
 
         vector<int> newRemaining = remaining;
         newRemaining.erase(std::remove(newRemaining.begin(), newRemaining.end(), nearest[i]), newRemaining.end());
-        vector<tuple<int, float>> result = nearestNeighbor(mat, first, nearest[i], newRemaining);
+        vector<tuple<int, float>> result = nearestNeighborRecursive(mat, first, nearest[i], newRemaining);
         result.insert(result.begin(), {nearest[i], std::get<1>(result[0]) + min});
 
         if(std::get<1>(result[0]) < std::get<1>(shortestFromTies[0])){ //if tie still exists, choose path with lowest index vertex, which is the path calculated first, hence the less than
@@ -82,13 +82,27 @@ vector<tuple<int, float>> nearestNeighbor(float** &mat, int first, int v, vector
     return shortestFromTies;
 }
 
+//wrapper for nearest neighbor function setting up arguments
+vector<tuple<int, float>> nearestNeighbor(float** &mat, int startVertex, int size){
+
+    vector<int> remaining(size); // initialize vector of remaining vertices
+    std::iota (std::begin(remaining), std::end(remaining), 0); // initialize with values 0 - size
+    remaining.erase(remaining.begin() + startVertex); // remove start vertex
+
+    return nearestNeighborRecursive(mat, startVertex, startVertex, remaining); //return result of algorithm
+}
+
 int main(){
 
+    system("Color 01"); //for fun :)
+
     cout << endl
-        << "-----------------------------------------------------" << endl
-        << "| Branching Nearest Neighbor for Traveling Salesman |" << endl
-        << "-----------------------------------------------------" << endl
-        << endl;
+         << "-----------------------------------------------------" << endl
+         << "| Branching Nearest Neighbor for Traveling Salesman |" << endl
+         << "-----------------------------------------------------" << endl
+         << "                                  | By Kyle Shepard |" << endl
+         << "                                  -------------------" << endl
+         << endl;
 
     // aribitrary size graph
     float** adjMat;
@@ -106,28 +120,37 @@ int main(){
     }
     cout << endl;
 
-    vector<tuple<int, float>> bestPath = {{-1, __FLT_MAX__}};
+    vector<tuple<int, float>> bestPath = {{-1, __FLT_MAX__}}; //placeholder with very large number
 
     //nearest neighbor starting at all vertices
     for(int i = 0; i < size; i++){
 
-        vector<int> remaining(size); // initialize vector of remaining vertices
-        std::iota (std::begin(remaining), std::end(remaining), 0); // initialize with values 0 - size
-        remaining.erase(remaining.begin() + i); // remove start vertex
-
-        // vector<tuple<int, float>> result = nearestNeighbor(adjMat, i, i, remaining);
-        vector<tuple<int, float>> path =  nearestNeighbor(adjMat, i, i, remaining);
+        vector<tuple<int, float>> path =  nearestNeighbor(adjMat, i, size);
 
         if(std::get<1>(path[0]) < std::get<1>(bestPath[0])){
             bestPath = path;
         }
     }
 
-    cout << "Results starting at vertex " << std::get<0>(bestPath[bestPath.size() - 1]) << ": " << endl;
+    cout << "Best path: " << endl;
+
+    cout << "\t" << std::get<0>(bestPath[bestPath.size() - 1]);
+
     for(int j = 0; j < bestPath.size(); j++){
-        cout << std::get<0>(bestPath[j]) << " " << std::get<1>(bestPath[j]) << endl;
+
+        cout << " -> " << std::get<0>(bestPath[j]);
     }
-    // cout << "--------------" << endl;
+
+    cout << endl
+         << "Total Cost:"
+         << "\n\t" << std::get<1>(bestPath[0]) << endl;
+
+    cout << endl
+         << endl
+         << "-------------" << endl
+         << "| ~~ END ~~ |" << endl
+         << "-------------" << endl
+         << endl;
 
     return 0;
 }
