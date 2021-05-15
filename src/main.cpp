@@ -102,11 +102,11 @@ int main(){
         for(int j = 0; j < size; j++){
             cout << adjMat[i][j] << ", ";
         }
-        cout << endl;
+        cout << endl << endl;
     }
-    cout << "\n\n";
+    cout << endl;
 
-    vector< vector< tuple<int, float> > > paths;
+    vector<tuple<int, float>> bestPath = {{-1, __FLT_MAX__}};
 
     //nearest neighbor starting at all vertices
     for(int i = 0; i < size; i++){
@@ -116,14 +116,18 @@ int main(){
         remaining.erase(remaining.begin() + i); // remove start vertex
 
         // vector<tuple<int, float>> result = nearestNeighbor(adjMat, i, i, remaining);
-        paths.push_back( nearestNeighbor(adjMat, i, i, remaining));
+        vector<tuple<int, float>> path =  nearestNeighbor(adjMat, i, i, remaining);
 
-        cout << endl << endl << "Results starting at vertex " << i << ": " << endl;
-        for(int j = 0; j < paths[i].size(); j++){
-            cout << std::get<0>(paths[i][j]) << " " << std::get<1>(paths[i][j]) << endl;
+        if(std::get<1>(path[0]) < std::get<1>(bestPath[0])){
+            bestPath = path;
         }
-        cout << "--------------" << endl;
     }
+
+    cout << "Results starting at vertex " << std::get<0>(bestPath[bestPath.size() - 1]) << ": " << endl;
+    for(int j = 0; j < bestPath.size(); j++){
+        cout << std::get<0>(bestPath[j]) << " " << std::get<1>(bestPath[j]) << endl;
+    }
+    // cout << "--------------" << endl;
 
     return 0;
 }
