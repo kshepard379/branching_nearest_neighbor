@@ -10,6 +10,7 @@
 
 using std::vector;
 using std::cout;
+using std::cin;
 using std::endl;
 using std::tuple;
 
@@ -106,22 +107,29 @@ int main(){
 
     // aribitrary size graph
     float** adjMat;
-    int size = 5;
+    cout << "Input graph size:" << endl;
+    int size;
+    cin >> size;
     generateMatrix(adjMat, size);
 
     // print generated matrix
     cout << "Adjacency Matrix:\n";
-    for(int i = 0; i < size; i++){
+    if(size <= 100){
+        for(int i = 0; i < size; i++){
         cout << "| ";
-        for(int j = 0; j < size; j++){
-            cout << adjMat[i][j] << ", ";
+            for(int j = 0; j < size; j++){
+                cout << adjMat[i][j] << ", ";
+            }
+            cout << endl << endl;
         }
-        cout << endl << endl;
+    } else {
+        cout << "Matrix too large to print" << endl;
     }
-    cout << endl;
+    cout << "Proceeding to nearest neighbot..." << endl << endl;
 
     vector<tuple<int, float>> bestPath = {{-1, __FLT_MAX__}}; //placeholder with very large number
-
+    int percentage = 0;
+    cout << "Progress:\n\t0%\n";
     //nearest neighbor starting at all vertices
     for(int i = 0; i < size; i++){
 
@@ -129,6 +137,13 @@ int main(){
 
         if(std::get<1>(path[0]) < std::get<1>(bestPath[0])){
             bestPath = path;
+        }
+
+        int progress = static_cast<int>(static_cast<float>(i) / static_cast<float>(size) * 100.0f);
+
+        if(progress > percentage){
+            percentage = progress;
+            cout << "\t" << percentage << "%" << endl;
         }
     }
 
