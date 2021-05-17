@@ -14,6 +14,8 @@ using std::cin;
 using std::endl;
 using std::tuple;
 
+#define MAX_FLOAT 3.402823466e+38F
+
 // pass 2 array by reference and randomly generate symmetric adjacency matrix for Kn graph
 void generateMatrix(float** &mat, int size){
 
@@ -51,7 +53,7 @@ vector<tuple<int, float>> nearestNeighborRecursive(float** &mat, int first, int 
 
     //find nearest neighbor(s)
     vector<int> nearest = {}; //vector in case of ties
-    float min = __FLT_MAX__; //keep track of min value separately
+    float min = MAX_FLOAT; //keep track of min value separately
 
     for(int i = 0; i < remaining.size(); i++){
 
@@ -66,7 +68,7 @@ vector<tuple<int, float>> nearestNeighborRecursive(float** &mat, int first, int 
     }
 
     //find lowest total weight of all ties. call function recursively
-    vector<tuple<int, float>> shortestFromTies = {{-1, __FLT_MAX__}};
+    vector<tuple<int, float>> shortestFromTies = {{-1, MAX_FLOAT}};
 
     for(int i = 0; i < nearest.size(); i++){
 
@@ -148,7 +150,7 @@ int main(){
         cin >> startVertex;
     }
 
-    vector<tuple<int, float>> bestPath = {{-1, __FLT_MAX__}}; //placeholder with very large number
+    vector<tuple<int, float>> bestPath = {{-1, MAX_FLOAT}}; //placeholder with very large number
 
     if(startVertex < 0){
 
