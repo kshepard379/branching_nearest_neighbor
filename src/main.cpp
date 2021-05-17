@@ -108,8 +108,17 @@ int main(){
     // aribitrary size graph
     float** adjMat;
     cout << "Input graph size:" << endl;
-    int size;
+    int size = 0;
     cin >> size;
+
+    while(size <=0 || !cin.good()){
+        cin.clear();
+        cin.ignore();
+        cout << "Please put in an integer greater than zero" << endl;
+        cin >> size;
+    }
+    cin.clear();
+    cin.ignore();
     generateMatrix(adjMat, size);
 
     // print generated matrix
@@ -125,27 +134,47 @@ int main(){
     } else {
         cout << "Matrix too large to print" << endl;
     }
-    cout << "Proceeding to nearest neighbot..." << endl << endl;
+
+    cout << "Proceeding to nearest neighbor..." << endl << endl;
+
+    cout << "Input start vertex (-1 to try all options):" << endl;
+    int startVertex = -1;
+    cin >> startVertex;
+
+    while(startVertex >= size || !cin.good()){
+        cin.clear();
+        cin.ignore();
+        cout << "Please put in an integer between 0 and " << size << ", or -1 to test all vertices" << endl;
+        cin >> startVertex;
+    }
 
     vector<tuple<int, float>> bestPath = {{-1, __FLT_MAX__}}; //placeholder with very large number
-    int percentage = 0;
-    cout << "Progress:\n\t0%\n";
-    //nearest neighbor starting at all vertices
-    for(int i = 0; i < size; i++){
 
-        vector<tuple<int, float>> path =  nearestNeighbor(adjMat, i, size);
+    if(startVertex < 0){
 
-        if(std::get<1>(path[0]) < std::get<1>(bestPath[0])){
-            bestPath = path;
-        }
+        int percentage = 0;
+        cout << "Progress:\n\t0%\n";
+        //nearest neighbor starting at all vertices
+        for(int i = 0; i < size; i++){
 
-        int progress = static_cast<int>(static_cast<float>(i) / static_cast<float>(size) * 100.0f);
+            vector<tuple<int, float>> path =  nearestNeighbor(adjMat, i, size);
 
-        if(progress > percentage){
-            percentage = progress;
-            cout << "\t" << percentage << "%" << endl;
+            if(std::get<1>(path[0]) < std::get<1>(bestPath[0])){
+                bestPath = path;
+            }
+
+            int progress = static_cast<int>(static_cast<float>(i) / static_cast<float>(size) * 100.0f);
+
+            if(progress > percentage){
+                percentage = progress;
+                cout << "\t" << percentage << "%" << endl;
+            }
         }
     }
+    else{
+        bestPath = nearestNeighbor(adjMat, startVertex, size);;
+    }
+
 
     cout << "Best path: " << endl;
 
