@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <numeric>
 #include <stdlib.h>
+#include <chrono>
 
 using std::vector;
 using std::cout;
@@ -166,6 +167,9 @@ int main(){
 
     //initialize placeholder path with very large weight to ensure any actual solution will overwrite it
     vector<tuple<int, float>> bestPath = {{-1, MAX_FLOAT}};
+    
+    //start timer
+    auto startTime = std::chrono::high_resolution_clock::now();
 
     if(startVertex < 0){ //test all possible start vertices
 
@@ -197,9 +201,12 @@ int main(){
     else{ //test only the vertex defined by user input
         bestPath = nearestNeighbor(adjMat, startVertex, size);;
     }
+    
+    //end timer
+    auto endTime = std::chrono::high_resolution_clock::now();
 
-    //output best found path (or the first one found of matching minimum total cost)
-    cout << "Best path: " << endl;
+    //output best found path (or the first one found of matching minimum total cost), plus execution time
+    cout << "Best path found after " << std::chrono::duration<float>(endTime - startTime).count() << " seconds: " << endl;
 
     cout << "\t" << std::get<0>(bestPath[bestPath.size() - 1]);
 
