@@ -1,3 +1,9 @@
+/*  Travelling Salesman using Branching Nearest Neighbor
+ *  MA-430 - Graph Theory and Combinatorics
+ *  Kyle Shepard
+ *  May 17, 2021
+ */
+
 #include <iostream>
 #include <vector>
 #include <ctime>
@@ -14,6 +20,7 @@ using std::cin;
 using std::endl;
 using std::tuple;
 
+//define our maximum float macro as placeholder in minimum weight calculations
 #define MAX_FLOAT 3.402823466e+38F
 
 // pass 2 array by reference and randomly generate symmetric adjacency matrix for Kn graph
@@ -55,27 +62,28 @@ vector<tuple<int, float>> nearestNeighborRecursive(float** &mat, int first, int 
     vector<int> nearest = {}; //vector in case of ties
     float min = MAX_FLOAT; //keep track of min value separately
 
-    for(int i = 0; i < remaining.size(); i++){
+    for(int i = 0; i < remaining.size(); i++){ //for all remaining vertices
 
-        float weight = mat[remaining[i]][v];
+        float weight = mat[remaining[i]][v]; //grab immediate cost of travelling to this vertex
 
-        if(weight < min){
-            nearest = {remaining[i]};
-            min = weight;
-        } else if (weight == min){
-            nearest.push_back(remaining[i]);
+        if(weight < min){ //if we have a new lowest candidate
+            nearest = {remaining[i]}; //replace with new lowest cost vertex
+            min = weight; //update weight to reflect new minimum
+        } else if (weight == min){ //if there is a tie
+            nearest.push_back(remaining[i]); //place it in a list with other matching cost branches
         }
+        //else ignore because the weight is too large
     }
 
     //find lowest total weight of all ties. call function recursively
     vector<tuple<int, float>> shortestFromTies = {{-1, MAX_FLOAT}};
 
-    for(int i = 0; i < nearest.size(); i++){
+    for(int i = 0; i < nearest.size(); i++){ //for all ties
 
-        vector<int> newRemaining = remaining;
-        newRemaining.erase(std::remove(newRemaining.begin(), newRemaining.end(), nearest[i]), newRemaining.end());
-        vector<tuple<int, float>> result = nearestNeighborRecursive(mat, first, nearest[i], newRemaining);
-        result.insert(result.begin(), {nearest[i], std::get<1>(result[0]) + min});
+        vector<int> newRemaining = remaining; //temporary vector to hold potential remaining vertices if we choose this vertex
+        newRemaining.erase(std::remove(newRemaining.begin(), newRemaining.end(), nearest[i]), newRemaining.end()); //remove this vertex from our temporary vector
+        vector<tuple<int, float>> result = nearestNeighborRecursive(mat, first, nearest[i], newRemaining); //call nearest neighbor function recursively and store
+        result.insert(result.begin(), {nearest[i], std::get<1>(result[0]) + min}); //place this vertex at the beginning of the sub-path with new total weight value
 
         if(std::get<1>(result[0]) < std::get<1>(shortestFromTies[0])){ //if tie still exists, choose path with lowest index vertex, which is the path calculated first, hence the less than
             shortestFromTies = result;
@@ -109,11 +117,14 @@ int main(){
 
     // aribitrary size graph
     float** adjMat;
+
+    //take in size of matrix from keyboard and check that it is a valid integer
     cout << "Input graph size:" << endl;
     int size = 0;
     cin >> size;
 
     while(size <=0 || !cin.good()){
+
         cin.clear();
         cin.ignore();
         cout << "Please put in an integer greater than zero" << endl;
@@ -121,6 +132,8 @@ int main(){
     }
     cin.clear();
     cin.ignore();
+
+    //create our matrix with custom size
     generateMatrix(adjMat, size);
 
     // print generated matrix
@@ -139,6 +152,7 @@ int main(){
 
     cout << "Proceeding to nearest neighbor..." << endl << endl;
 
+    //get input for starting vertex from keyboard and check that it is a valid integer
     cout << "Input start vertex (-1 to try all options):" << endl;
     int startVertex = -1;
     cin >> startVertex;
@@ -150,34 +164,41 @@ int main(){
         cin >> startVertex;
     }
 
-    vector<tuple<int, float>> bestPath = {{-1, MAX_FLOAT}}; //placeholder with very large number
+    //initialize placeholder path with very large weight to ensure any actual solution will overwrite it
+    vector<tuple<int, float>> bestPath = {{-1, MAX_FLOAT}};
 
-    if(startVertex < 0){
+    if(startVertex < 0){ //test all possible start vertices
 
+        //check progress (useful for large graphs)
         int percentage = 0;
         cout << "Progress:\n\t0%\n";
+
         //nearest neighbor starting at all vertices
         for(int i = 0; i < size; i++){
 
+            //get best path starting from vertex i as "home city"
             vector<tuple<int, float>> path =  nearestNeighbor(adjMat, i, size);
 
+            //check if solution is better than a previous solution (or placeholder)
             if(std::get<1>(path[0]) < std::get<1>(bestPath[0])){
                 bestPath = path;
             }
 
+            //calculate progress as integer (1-100)
             int progress = static_cast<int>(static_cast<float>(i) / static_cast<float>(size) * 100.0f);
 
+            //if progress percentage value as integer changes, then update progress indicator
             if(progress > percentage){
                 percentage = progress;
                 cout << "\t" << percentage << "%" << endl;
             }
         }
     }
-    else{
+    else{ //test only the vertex defined by user input
         bestPath = nearestNeighbor(adjMat, startVertex, size);;
     }
 
-
+    //output best found path (or the first one found of matching minimum total cost)
     cout << "Best path: " << endl;
 
     cout << "\t" << std::get<0>(bestPath[bestPath.size() - 1]);
